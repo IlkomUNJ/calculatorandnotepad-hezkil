@@ -56,7 +56,6 @@ fun loadNote(context: Context): String {
     return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         .getString(KEY_NOTE_TEXT, "") ?: ""
 }
-// ------------------------------------------
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,7 +71,6 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotepadScreenCompose() {
-    // 1. State Management: Menggunakan TextFieldValue untuk menangani teks dan posisi kursor/selection
     var noteTextState by remember { mutableStateOf(TextFieldValue("")) }
 
     val context = LocalContext.current
@@ -112,7 +110,7 @@ fun NotepadScreenCompose() {
             TextFieldValue("", TextRange.Zero)
         }
     }
-    // -----------------------------------------------------------
+
 
     Scaffold(
         topBar = {
@@ -124,21 +122,19 @@ fun NotepadScreenCompose() {
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    // --- SAVE FUNCTION ---
                     IconButton(onClick = {
                         saveNote(context, noteTextState.text)
-                        showToast("Note Saved to disk! ✅")
+                        showToast("Note Saved to disk!")
                     }) {
                         Icon(Icons.Filled.Save, contentDescription = "Save Note")
                     }
 
-                    // --- COPY FUNCTION (Selected Text) ---
                     IconButton(onClick = {
                         val textToCopy = getSelectedOrAllText(noteTextState)
                         if (textToCopy.isNotEmpty()) {
                             val clip = ClipData.newPlainText("Note", textToCopy)
                             clipboardManager.setPrimaryClip(clip)
-                            showToast("Text Copied! 📋")
+                            showToast("Text Copied!")
                         } else {
                             showToast("Nothing to copy.")
                         }
@@ -146,7 +142,6 @@ fun NotepadScreenCompose() {
                         Icon(Icons.Filled.ContentCopy, contentDescription = "Copy Text")
                     }
 
-                    // --- PASTE FUNCTION (At Cursor Position) ---
                     IconButton(onClick = {
                         val clipData = clipboardManager.primaryClip
                         if (clipData != null && clipData.itemCount > 0) {
@@ -155,14 +150,13 @@ fun NotepadScreenCompose() {
                             val currentText = noteTextState.text
                             val selection = noteTextState.selection
 
-                            // Sisipkan teks di posisi kursor/selection
                             val newText = currentText.substring(0, selection.start) +
                                     pasteText +
                                     currentText.substring(selection.end)
 
                             val newCursorPosition = selection.start + pasteText.length
                             noteTextState = TextFieldValue(newText, TextRange(newCursorPosition))
-                            showToast("Text Pasted! 📌")
+                            showToast("Text Pasted!")
                         } else {
                             showToast("Clipboard is empty.")
                         }
@@ -170,26 +164,23 @@ fun NotepadScreenCompose() {
                         Icon(Icons.Filled.ContentPaste, contentDescription = "Paste Text")
                     }
 
-                    // --- CUT FUNCTION (Selected Text) ---
                     IconButton(onClick = {
                         val textToCut = getSelectedOrAllText(noteTextState)
                         if (textToCut.isNotEmpty()) {
-                            // 1. Copy teks ke clipboard
                             val clip = ClipData.newPlainText("Note", textToCut)
                             clipboardManager.setPrimaryClip(clip)
 
-                            // 2. Hapus teks dari TextField
                             noteTextState = deleteSelectedOrAllText(noteTextState)
-                            showToast("Text Cut! ✂️")
+                            showToast("Text Cut!")
                         } else {
                             showToast("Nothing to cut.")
                         }
                     }) {
                         Icon(Icons.Filled.ContentCut, contentDescription = "Cut Text")
                     }
-                    
+
                     IconButton(onClick = {
-                        noteTextState = TextFieldValue("", TextRange.Zero) // Clear the text
+                        noteTextState = TextFieldValue("", TextRange.Zero)
                         showToast("New Note started.")
                     }) {
                         Icon(Icons.Filled.CreateNewFolder, contentDescription = "New Note")
@@ -198,7 +189,7 @@ fun NotepadScreenCompose() {
                 floatingActionButton = {
                     FloatingActionButton(
                         onClick = {
-                            noteTextState = TextFieldValue("", TextRange.Zero) // Clear the text
+                            noteTextState = TextFieldValue("", TextRange.Zero)
                             showToast("New Note started.")
                         },
                         containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
@@ -211,9 +202,9 @@ fun NotepadScreenCompose() {
         }
     ) { paddingValues ->
         TextField(
-            value = noteTextState, // Menggunakan TextFieldValue
+            value = noteTextState,
             onValueChange = { newTextFieldValue ->
-                noteTextState = newTextFieldValue // Update TextFieldValue
+                noteTextState = newTextFieldValue
             },
             label = { Text("Start typing your note here...") },
             modifier = Modifier
